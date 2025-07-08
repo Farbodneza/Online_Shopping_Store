@@ -16,7 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework.permissions import AllowAny
+schema_view = get_schema_view(
+    openapi.Info(
+        title='online shop',
+        default_version='v1',
+        description='our online shop swagger',
+    ),
+    public=True,
+    permission_classses=[AllowAny]
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('swagger/', schema_view.with_ui(), name='schema-swagger-ui')
 ]

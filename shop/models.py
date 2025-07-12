@@ -24,4 +24,14 @@ class Product(models.Model):
         return self.name
     
 
+class Store(models.Model):
+    name = models.CharField()
+    description = models.TextField()
+    seller = models.ForeignKey(Customer, related_name='store')
+    address = models.ForeignKey(Address)
+
+
+class Seller(models.Model):
+    user = models.OneToOneField(Customer, on_delete=models.CASCADE)
+
 

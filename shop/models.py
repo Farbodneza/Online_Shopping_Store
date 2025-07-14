@@ -1,34 +1,39 @@
 from django.db import models
-from account.models import Customer, Address
+from account.models import CustomUser, Address
 
 # Create your models here.
 class Category(models.Model):
     name = models.CharField()
     description = models.TextField()
-    image = models.ImageField()
+    image = models.ImageField(upload_to='category_images/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     parent = models.ForeignKey('self', on_delete=models.SET_NULL,  null=True, blank=True)
 
 
 class Product(models.Model):
     name = models.TextField(max_length=150, unique=True)
-    image = models.ImageField(upload_to='product_pictures')
     description = models.TextField()
     best_price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
-    rating = models.DecimalField()
-    categories = models.ManyToManyField()
+    rating = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True, default=0.0)
+    categories = models.ManyToManyField(Category, related_name='products')
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField()
     def __str__(self):
         return self.name
+    
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name="محصول")
+    image = models.ImageField(upload_to='product_images/', verbose_name="تصویر")
     
 
 class Store(models.Model):
     name = models.CharField()
     description = models.TextField()
     seller = models.ForeignKey(Customer, related_name='store')
-    address = models.ForeignKey(Address)
 
 
 class Seller(models.Model):
@@ -55,7 +60,7 @@ class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders', default=None)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.IntegerField(choices=STATUS_CHOCES, default=1)
-    shipping_address = models.ForeignKey(Address, on_delete=models.PROTECT, null=True)
+    address = models.ForeignKey(Address, on_delete=models.PROTECT, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 

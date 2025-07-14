@@ -26,26 +26,25 @@ class Product(models.Model):
     
 
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name="محصول")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='product_images/', verbose_name="تصویر")
     
 
 class Store(models.Model):
     name = models.CharField()
     description = models.TextField()
-    seller = models.ForeignKey(Customer, related_name='store')
-
-
-class Seller(models.Model):
-    user = models.OneToOneField(Customer, on_delete=models.CASCADE)
+    seller = models.ForeignKey(CustomUser, related_name='store')
 
 
 class StoreItem(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     stock = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField()
     
 
 class Order(models.Model):
@@ -57,11 +56,12 @@ class Order(models.Model):
         (5, 'FAILED'),
         
     ]
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders', default=None)
+    customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders', default=None)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.IntegerField(choices=STATUS_CHOCES, default=1)
     address = models.ForeignKey(Address, on_delete=models.PROTECT, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField()
 
 
 class OrderItem(models.Model):

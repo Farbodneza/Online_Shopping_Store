@@ -2,10 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
-class Customer(AbstractUser):
+class CustomUser(AbstractUser):
     bio = models.TextField(blank=True,null=True)
-    profile_picture = models.ImageField(upload_to=,blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures',blank=True, null=True)
     phone_number = models.CharField(max_length=15, unique=True)
+    is_seller = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField()
     def set_primary_address(self, address_id):
@@ -20,12 +21,16 @@ class Customer(AbstractUser):
 
 
 class Address(models.Model):
-    user = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='addresses')
-    name = models.CharField(max_length=100)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='addresses')
+    label = models.CharField(max_length=100)
     postal_code = models.PositiveIntegerField()
-    city = models.CharField()
     country = models.CharField()
-    address = models.TextField()
+    city = models.CharField()
+    state = models.CharField()
+    address_line_1 = models.TextField()
+    address_line_2 = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField();
     is_primary = models.BooleanField()
     def __str__(self):
         return f"{self.name} - {self.city}, {self.country}"

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from account.models import Customer
 
 
-class CustomerRegisterSerializer(serializers.ModelSerializer):
+class CustomuserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ['username', 'email', 'password']

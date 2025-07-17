@@ -24,3 +24,7 @@ class CustomuserRegisterSerializer(serializers.ModelSerializer):
 class CustomuserLoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(required=True, write_only=True)
+
+
+class OTPRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()

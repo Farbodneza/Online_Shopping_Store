@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
    'default': {
        'ENGINE': 'django.db.backends.postgresql',
-       'NAME': 'shop',
+       'NAME': 'online_shop',
        'USER': 'postgres',
        'PASSWORD': '1',
        'HOST': 'localhost',
@@ -154,5 +154,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'farbodnez83@example.com'  
+EMAIL_HOST_USER = 'farbodneza@gmail.com'  
 EMAIL_HOST_PASSWORD = 'pkhs zvss mohl zpxk'  
+
+# {"email" : "farbodnez83@gmail.com"}

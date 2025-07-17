@@ -1,15 +1,16 @@
 from rest_framework import serializers
-from account.models import Customer
+from account.models import CustomUser
 
 
 class CustomuserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Customer
-        fields = ['username', 'email', 'password']
+        model = CustomUser
+        fields = ['username', 'email', 'password', 'phone_number']
     def create(self, validated_data):
-        user = Customer(
+        user = CustomUser(
             username=validated_data['username'],
-            email=validated_data['email']
+            email=validated_data['email'],
+            phone_number = validated_data['phone_number']
             )
         user.set_password(validated_data['password'])
         user.save()

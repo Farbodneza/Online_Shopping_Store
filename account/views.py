@@ -7,7 +7,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
 from account.models import CustomUser, Address
-from account.serializers import CustomuserRegisterSerializer, CustomuserLoginSerializer
+from django.core.cache import cache
+from django.http import HttpResponse
+from account.utils import send_custom_email
+from account.serializers import (CustomuserRegisterSerializer, 
+                                CustomuserLoginSerializer, 
+                                OTPRequestSerializer
+                            )
+import random
 
 class RegisterUserAPIView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -44,4 +51,29 @@ class LogoutUserAPIView(APIView):
         print(request.user)
         return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_204_NO_CONTENT)
     
+
+class RequestOTPAPIView(APIView):
+    def post(self, request, *args, **kwargs):   
+        serializer = OTPRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+
+        try:
+            user = CustomUser.objects.get(email=email)
+        except:
+            return Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        otp_code = str(random.randint(100000, 999999))
+        cache.set(f'otp_{email}', otp_code, timeout=120)
+
+        subject = 'Hello from Farbod Shop'
+        message = f'This is your OTP : {otp_code}'
+        recipient_list = [email] 
+
+        send_custom_email(subject, message, recipient_list)
+
+        print(f"OTP for {email}: {otp_code}")
+
+        return Response({'message': 'OTP has been sent to your email.'}, status=status.HTTP_200_OK)
+
 

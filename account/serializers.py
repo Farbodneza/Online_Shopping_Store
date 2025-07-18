@@ -29,3 +29,8 @@ class CustomuserLoginSerializer(serializers.Serializer):
 
 class OTPRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class OTPVerifySerializer(serializers.Serializer):
+    email = serializers.EmailField()    
+    otp = serializers.CharField()

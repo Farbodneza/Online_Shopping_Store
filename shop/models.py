@@ -33,7 +33,7 @@ class ProductImage(models.Model):
 class Store(models.Model):
     name = models.CharField()
     description = models.TextField()
-    seller = models.ForeignKey(CustomUser, related_name='store')
+    seller = models.ForeignKey(CustomUser, related_name='store', on_delete=models.CASCADE)
 
 
 class StoreItem(models.Model):
@@ -72,3 +72,54 @@ class OrderItem(models.Model):
     total_price  = models.DecimalField(max_digits=10, decimal_places=2)
 
 
+class Cart(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='cart')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Cart for {self.user.username}"
+
+    @property
+    def total_price(self):
+        return sum(item.total_price for item in self.items.all())
+
+    @property
+    def total_discount(self):
+        return sum(item.total_discount for item in self.items.all())
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    store_item = models.ForeignKey('StoreItem', on_delete=models.CASCADE, related_name='cart_items')
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.store_item.product.name} in {self.cart.user.username}'s cart"
+
+    @property
+    def unit_price(self):
+        return self.store_item.price
+
+    @property
+    def total_discount(self):
+        if self.store_item.discount_price:
+            return (self.store_item.price - self.store_item.discount_price) * self.quantity
+        return 0
+
+    @property
+    def total_item_price(self):
+        price = self.store_item.discount_price or self.store_item.price
+        return price * self.quantity
+
+    @property
+    def total_price(self):
+        return self.total_item_price
+
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField() 
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

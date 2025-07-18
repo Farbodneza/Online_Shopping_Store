@@ -12,7 +12,8 @@ from django.http import HttpResponse
 from account.utils import send_custom_email
 from account.serializers import (CustomuserRegisterSerializer, 
                                 CustomuserLoginSerializer, 
-                                OTPRequestSerializer
+                                OTPRequestSerializer,
+                                OTPVerifySerializer
                             )
 import random
 
@@ -76,4 +77,41 @@ class RequestOTPAPIView(APIView):
 
         return Response({'message': 'OTP has been sent to your email.'}, status=status.HTTP_200_OK)
 
+
+class VerifyOTPAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = OTPVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        email = serializer.validated_data['email']
+        otp_from_user = serializer.validated_data['otp']
+
+        stored_otp = cache.get(f'otp_{email}')
+
+        if not stored_otp:
+            return Response({'error': 'OTP has expired or is invalid.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if stored_otp != otp_from_user:
+            return Response({'error': 'Invalid OTP code.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        refresh = RefreshToken.for_user(user)
+
+        login(request, user)
+        
+        cache.delete(f'otp_{email}')
+
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        }, status=status.HTTP_200_OK)
 

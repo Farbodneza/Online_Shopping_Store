@@ -34,3 +34,9 @@ class OTPRequestSerializer(serializers.Serializer):
 class OTPVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()    
     otp = serializers.CharField()
+
+
+class CustomUserEditProfile(serializers.Serializer):
+    bio = serializers.CharField(required=False)
+    profile_picture = serializers.ImageField(required=False)
+    username = serializers.CharField(required=False)

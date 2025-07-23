@@ -10,6 +10,10 @@ class Category(models.Model):
     parent = models.ForeignKey('self', on_delete=models.SET_NULL,  null=True, blank=True)
 
 
+class ProductImage(models.Model):
+    image = models.ImageField(upload_to='product_images/', verbose_name="تصویر")
+
+
 class Product(models.Model):
     name = models.TextField(max_length=150, unique=True)
     description = models.TextField()
@@ -21,13 +25,9 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField()
+    image = models.ManyToManyField(ProductImage, related_name='product')
     def __str__(self):
         return self.name
-    
-
-class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='product_images/', verbose_name="تصویر")
     
 
 class Store(models.Model):

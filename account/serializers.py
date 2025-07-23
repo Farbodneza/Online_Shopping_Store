@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from account.models import CustomUser
+from account.models import CustomUser, Address
 
 
 class CustomuserRegisterSerializer(serializers.ModelSerializer):
@@ -40,3 +40,8 @@ class CustomUserEditProfile(serializers.Serializer):
     bio = serializers.CharField(required=False)
     profile_picture = serializers.ImageField(required=False)
     username = serializers.CharField(required=False)
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address

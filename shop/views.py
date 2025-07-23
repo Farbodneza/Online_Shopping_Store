@@ -6,13 +6,26 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
-from shop.models import Product, Store, StoreItem, ProductImage
+from shop.models import Product, Store, StoreItem, ProductImage, Category
 from django.core.cache import cache
 from rest_framework.decorators import action
 from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated , AllowAny, IsAdminUser
 from shop.permissions import IsSeller, IsShopOwner
-from shop.serializers import (ProductSerializer,)
+from shop.serializers import (ProductSerializer, 
+                              CategorySerializer
+                            )
+
+
+class ManageCategoryAPIViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    def get_permissions(self):
+        if self.action == 'List':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAuthenticated, IsSeller]
+        return [permission() for permission in permission_classes]
 
 
 class ManageProductAPIViewSet(viewsets.ModelViewSet):
@@ -33,4 +46,6 @@ class ManageStoreAPIViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
+
+
 

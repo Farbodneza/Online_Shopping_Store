@@ -10,6 +10,7 @@ from shop.models import Product, Store, StoreItem, ProductImage, Category
 from django.core.cache import cache
 from rest_framework.decorators import action
 from django.http import HttpResponse
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated , AllowAny, IsAdminUser
 from shop.permissions import IsSeller, IsShopOwner, CanAddShopItem
 from shop.serializers import (ProductSerializer, 
@@ -18,33 +19,27 @@ from shop.serializers import (ProductSerializer,
                             )
 
 
-class CategoryAPIViewSet(viewsets.ReadOnlyModelViewSet):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.filter(is_active=True)
     serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated, IsSeller]
+        return super().get_permissions()
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         category_data = self.get_serializer(instance).data
-        products = instance.products.all() 
+        products = instance.products.filter(is_active=True)
         product_data = ProductSerializer(products, many=True, context={'request': request}).data
-
+        
         return Response({
             "category": category_data,
             "products": product_data
         })
-
-
-class ManageCategoryAPIViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    def get_permissions(self):
-        if self.action == 'List':
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAuthenticated, IsSeller]
-        return [permission() for permission in permission_classes]
-
 
 class ManageProductAPIViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -64,6 +59,18 @@ class ManageStoreAPIViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
+    
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     store_data = self.get_serializer(instance).data
+    #     products = instance.items.all() 
+    #     product_data = ProductSerializer(products, many=True, context={'request': request}).data
+
+    #     return Response({
+    #         "category": store_data,
+    #         "products": product_data
+    #     })
 
 
 class ManageStoreItemsAPIViewSet(viewsets.ModelViewSet):

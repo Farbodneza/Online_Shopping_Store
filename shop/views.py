@@ -11,9 +11,10 @@ from django.core.cache import cache
 from rest_framework.decorators import action
 from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated , AllowAny, IsAdminUser
-from shop.permissions import IsSeller, IsShopOwner
+from shop.permissions import IsSeller, IsShopOwner, CanAddShopItem
 from shop.serializers import (ProductSerializer, 
-                              CategorySerializer
+                              CategorySerializer,
+                              StoreItemSerializer
                             )
 
 
@@ -64,5 +65,10 @@ class ManageStoreAPIViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
+
+class ManageStoreItemsAPIViewSet(viewsets.ModelViewSet):
+    queryset = StoreItem.objects.filter(is_active=True)
+    serializer_class = StoreItemSerializer
+    permission_classes = [IsAuthenticated, CanAddShopItem]
 
 

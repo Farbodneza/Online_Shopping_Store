@@ -5,14 +5,17 @@ from shop.models import Product, shop, ProductImage, Category, Store
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields= "__all__"
+        fields= ['id', 'image']
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    parent = serializers.StringRelatedField()
+    parent = serializers.StringRelatedField(read_only=True)
+    parent_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), source='parent', write_only=True, required=False, allow_null=True
+    )
     class Meta:
         model = Category
-        fields= ['name', 'parent', 'description', 'image', 'is_active']
+        fields = ['id', 'name', 'parent', 'parent_id', 'description', 'image', 'is_active']
 
 
 class ProductSerializer(serializers.ModelSerializer):

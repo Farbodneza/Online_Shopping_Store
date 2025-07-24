@@ -8,5 +8,9 @@ class IsSeller(BasePermission):
 
 class IsShopOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return object == request.user.store
+        return obj == request.user.store
         
+
+class CanAddShopItem(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.store == request.user.store

@@ -15,7 +15,8 @@ from rest_framework.permissions import IsAuthenticated , AllowAny, IsAdminUser, 
 from shop.permissions import IsSeller, IsShopOwner, CanAddShopItem
 from shop.serializers import (ProductSerializer, 
                               CategorySerializer,
-                              StoreItemSerializer
+                              StoreItemSerializer,
+                                StoreSerializer,
                             )
 
 
@@ -49,7 +50,7 @@ class ManageProductAPIViewSet(viewsets.ModelViewSet):
 
 
 class ManageStoreAPIViewSet(viewsets.ModelViewSet):
-    serializer_class = ProductSerializer
+    serializer_class = StoreSerializer
     
 
     def get_queryset(self):

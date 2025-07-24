@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from shop.models import Product, shop, ProductImage, Category, Store
+from shop.models import Product, ProductImage, Category, Store, StoreItem
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -29,19 +29,25 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
 
-class ShopSerializer(serializers.ModelSerializer):
+class StoreSerializer(serializers.ModelSerializer):
+    seller = serializers.StringRelatedField(read_only=True)
     class Meta:
-        model = shop 
-        fields= "__all__"
+        model = Store
+        fields = ['id', 'name', 'description', 'seller']
 
 
 class StoreItemSerializer(serializers.ModelSerializer):
-    store = ShopSerializer()
-    product = ProductSerializer()
+    store = StoreSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
+    store_id = serializers.PrimaryKeyRelatedField(
+        queryset=Store.objects.all(), source='store', write_only=True
+    )
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), source='product', write_only=True
+    )
     class Meta:
-        model = Store
-        fileds = ['store', 'product', 'price', 'discount_price', 'stock', 'is_active', 'created_at', 'updated_at']
-
-
-
-
+        model = StoreItem
+        fields = [
+            'id', 'store', 'product', 'store_id', 'product_id', 'price', 
+            'discount_price', 'stock', 'is_active', 'created_at', 'updated_at'
+        ]

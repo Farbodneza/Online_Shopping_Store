@@ -19,10 +19,14 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(source='productimage_set', many=True)
+    images = ProductImageSerializer(many=True, read_only=True)
+    categories = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
     class Meta:
         model = Product
-        fields = "__all__"
+        fields = [
+            'id', 'name', 'description', 'best_price', 'stock', 'rating', 
+            'categories', 'images', 'is_active', 'created_at', 'updated_at'
+        ]
 
 
 class ShopSerializer(serializers.ModelSerializer):

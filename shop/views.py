@@ -11,7 +11,7 @@ from django.core.cache import cache
 from rest_framework.decorators import action
 from django.http import HttpResponse
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.permissions import IsAuthenticated , AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated , AllowAny, IsAdminUser, PermissionDenied
 from shop.permissions import IsSeller, IsShopOwner, CanAddShopItem
 from shop.serializers import (ProductSerializer, 
                               CategorySerializer,
@@ -41,6 +41,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
             "products": product_data
         })
 
+
 class ManageProductAPIViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -48,34 +49,52 @@ class ManageProductAPIViewSet(viewsets.ModelViewSet):
 
 
 class ManageStoreAPIViewSet(viewsets.ModelViewSet):
-    queryset = Store.objects.all()
     serializer_class = ProductSerializer
     
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated and hasattr(self.request.user, 'store'):
+            return Store.objects.filter(seller=self.request.user)
+        return Store.objects.all()
+
+
     def get_permissions(self):
         if self.action in ['update', 'partial_update', 'destroy']:
             permission_classes = [IsAuthenticated, IsSeller, IsShopOwner]
         elif self.action == 'create':
-            permission_classes = [IsAuthenticated, IsSeller]
+            permission_classes = [IsAuthenticated]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     
 
-    # def retrieve(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     store_data = self.get_serializer(instance).data
-    #     products = instance.items.all() 
-    #     product_data = ProductSerializer(products, many=True, context={'request': request}).data
+    def perform_create(self, serializer):
+        user= self.request.user
+        if hasattr(user, 'store'):
+            raise PermissionDenied("You already own a store.")
+        serializer.save(seller=user)
+        user.objects.update(is_seller = True)
+        
 
-    #     return Response({
-    #         "category": store_data,
-    #         "products": product_data
-    #     })
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        store_data = self.get_serializer(instance).data
+        
+        store_items = instance.items.filter(is_active=True)
+        item_data = StoreItemSerializer(store_items, many=True, context={'request': request}).data
 
+        return Response({
+            "store": store_data,
+            "items": item_data
+        })
 
+    
 class ManageStoreItemsAPIViewSet(viewsets.ModelViewSet):
     queryset = StoreItem.objects.filter(is_active=True)
     serializer_class = StoreItemSerializer
     permission_classes = [IsAuthenticated, CanAddShopItem]
+    def perform_create(self, serializer):
+        serializer.save(store=self.request.user.store)
+        return super().perform_create(serializer)
 
 

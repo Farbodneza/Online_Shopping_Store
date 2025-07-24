@@ -17,6 +17,23 @@ from shop.serializers import (ProductSerializer,
                             )
 
 
+class CategoryAPIViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.filter(is_active=True)
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        category_data = self.get_serializer(instance).data
+        products = instance.products.all() 
+        product_data = ProductSerializer(products, many=True, context={'request': request}).data
+
+        return Response({
+            "category": category_data,
+            "products": product_data
+        })
+
+
 class ManageCategoryAPIViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer

@@ -8,6 +8,13 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields= "__all__"
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    parent = serializers.StringRelatedField()
+    class Meta:
+        model = Category
+        fields= ['name', 'parent', 'description', 'image', 'is_active']
+
+
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(source='productimage_set', many=True)
     class Meta:
@@ -21,8 +28,7 @@ class ShopSerializer(serializers.ModelSerializer):
         fields= "__all__"
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    parent = serializers.StringRelatedField()
-    class Meta:
-        model = Category
-        fields= ['name', 'parent', 'description', 'image', 'is_active']
+
+
+
+

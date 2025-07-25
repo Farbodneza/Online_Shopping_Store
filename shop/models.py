@@ -7,7 +7,7 @@ class Category(models.Model):
     description = models.TextField()
     image = models.ImageField(upload_to='category_images/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    parent = models.ForeignKey('self', on_delete=models.SET_NULL,  null=True, blank=True)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL,  null=True, blank=True, related_name='children')
 
 
 class ProductImage(models.Model):

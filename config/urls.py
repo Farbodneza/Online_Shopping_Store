@@ -14,11 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import debug_toolbar
 from django.contrib import admin
 from django.urls import path, include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from account.urls import urlspatterns as AcountAPI
+from shop.urls import urlpatterns as ShopAPI
 from rest_framework.permissions import AllowAny
 schema_view = get_schema_view(
     openapi.Info(
@@ -36,8 +38,10 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('__debug__/', include(debug_toolbar.urls)),
     path('swagger/', schema_view.with_ui(), name='schema-swagger-ui'),
-     path('api/', include(AcountAPI)),
-     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/', include(AcountAPI)),
+    path('api/', include(ShopAPI)),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

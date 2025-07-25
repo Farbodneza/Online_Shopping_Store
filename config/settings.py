@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework',
     'account',
-    'shop'
+    'shop',
+    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -158,3 +159,8 @@ EMAIL_HOST_USER = 'farbodneza@gmail.com'
 EMAIL_HOST_PASSWORD = 'pkhs zvss mohl zpxk'  
 
 # {"email" : "farbodnez83@gmail.com"}
+
+# {
+#     "username": "ali",
+#     "password": "1"
+# }

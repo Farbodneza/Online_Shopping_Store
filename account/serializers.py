@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from account.models import CustomUser
+from account.models import CustomUser, Address
 
 
 class CustomuserRegisterSerializer(serializers.ModelSerializer):
@@ -34,3 +34,27 @@ class OTPRequestSerializer(serializers.Serializer):
 class OTPVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()    
     otp = serializers.CharField()
+
+
+class CustomUserEditProfile(serializers.Serializer):
+    bio = serializers.CharField(required=False)
+    profile_picture = serializers.ImageField(required=False)
+    username = serializers.CharField(required=False)
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = [
+            'id', 
+            'user', 
+            'label', 
+            'address_line_1', 
+            'address_line_2', 
+            'city', 
+            'state', 
+            'postal_code', 
+            'country',
+            'is_primary' 
+        ]
+        read_only_fields = ['id', 'user']

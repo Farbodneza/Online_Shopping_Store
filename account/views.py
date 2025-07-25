@@ -8,12 +8,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
 from account.models import CustomUser, Address
 from django.core.cache import cache
+from rest_framework.decorators import action
 from django.http import HttpResponse
+from rest_framework.permissions import IsAuthenticated , AllowAny, IsAdminUser
+from account.permissions import IsProfileOwnerOrAdmin
 from account.utils import send_custom_email
 from account.serializers import (CustomuserRegisterSerializer, 
                                 CustomuserLoginSerializer, 
                                 OTPRequestSerializer,
-                                OTPVerifySerializer
+                                OTPVerifySerializer,
+                                CustomUserEditProfile,
+                                AddressSerializer
                             )
 import random
 
@@ -114,4 +119,41 @@ class VerifyOTPAPIView(APIView):
                 'email': user.email
             }
         }, status=status.HTTP_200_OK)
+
+
+class ProfileManagmentAPIView(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return CustomUserEditProfile
+        return CustomuserRegisterSerializer
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [IsAdminUser]
+        elif self.action in ['update', 'partial_update', 'destroy', 'retrieve']:
+            permission_classes = [IsAuthenticated, IsProfileOwnerOrAdmin] 
+        else:
+            permission_classes = [IsAuthenticated, IsAdminUser]
+        return [permission() for permission in permission_classes]
+    
+
+class AddressManagerAPIViewSet(viewsets.ModelViewSet):
+    serializer_class = AddressSerializer
+    permission_classes = permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Address.objects.filter(user=self.request.user)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def set_primary_address(self, request, *args, **kwargs):
+        address = self.get_object()  
+        self.get_queryset().update(is_primary=False)
+        address.is_primary = True
+        address.save()
+
+        return Response({"status": "primary address set"}, status=status.HTTP_200_OK)
 

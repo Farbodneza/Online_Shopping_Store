@@ -30,7 +30,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class StoreSerializer(serializers.ModelSerializer):
-    seller = serializers.StringRelatedField(read_only=True)
+    seller = serializers.StringRelatedField()
     class Meta:
         model = Store
         fields = ['id', 'name', 'description', 'seller']

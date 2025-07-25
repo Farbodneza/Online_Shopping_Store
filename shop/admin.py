@@ -50,7 +50,7 @@ class ReviewAdmin(admin.ModelAdmin):
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
-    list_display = ('product', 'image')
+    list_display = ('image',)
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):

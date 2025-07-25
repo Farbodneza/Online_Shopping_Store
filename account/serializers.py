@@ -45,4 +45,16 @@ class CustomUserEditProfile(serializers.Serializer):
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = "__all__"
+        fields = [
+            'id', 
+            'user', 
+            'label', 
+            'address_line_1', 
+            'address_line_2', 
+            'city', 
+            'state', 
+            'postal_code', 
+            'country',
+            'is_primary' 
+        ]
+        read_only_fields = ['id', 'user']

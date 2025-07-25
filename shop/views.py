@@ -10,6 +10,7 @@ from rest_framework import viewsets, status
 from shop.models import Product, Store, StoreItem, ProductImage, Category
 from django.core.cache import cache
 from rest_framework.decorators import action
+from django.db.models import Min
 from django.http import HttpResponse
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated , AllowAny, IsAdminUser
@@ -69,6 +70,29 @@ class ProductAPIViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated, IsSeller]
 
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def best_price(self, request, *args, **kwargs):
+        product = self.get_object()
+        result = product.sellers.filter(is_active=True, stock__gt=0).aggregate(
+            min_price=Min('price'),
+            min_discount_price=Min('discount_price')
+        )
+
+        min_price = result.get('min_price')
+        min_discount_price = result.get('min_discount_price')
+
+        best_price = None
+        if min_price is not None:
+            best_price = min_price
+        
+        if min_discount_price is not None and (best_price is None or min_discount_price < best_price):
+            best_price = min_discount_price
+
+        if best_price is not None:
+            return Response({"best_price": best_price})
+        else:
+            return Response({"message": "This product is not currently available from any store."}, status=status.HTTP_404_NOT_FOUND)
+
 
 class StoreAPIViewSet(viewsets.ModelViewSet):
     serializer_class = StoreSerializer
@@ -102,7 +126,7 @@ class StoreAPIViewSet(viewsets.ModelViewSet):
             "store": store_data,
             "items": item_data
         })
-
+    
     
 class StoreItemsAPIViewSet(viewsets.ModelViewSet):
     serializer_class = StoreItemSerializer

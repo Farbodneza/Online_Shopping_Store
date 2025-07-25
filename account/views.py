@@ -129,7 +129,7 @@ class ProfileManagmentAPIView(viewsets.ModelViewSet):
         return CustomuserRegisterSerializer
     def get_permissions(self):
         if self.action == 'list':
-            permision_classes = [IsAdminUser]
+            permission_classes = [IsAdminUser]
         elif self.action in ['update', 'partial_update', 'destroy', 'retrieve']:
             permission_classes = [IsAuthenticated, IsProfileOwnerOrAdmin] 
         else:
@@ -142,7 +142,11 @@ class AddressManagerAPIViewSet(viewsets.ModelViewSet):
     permission_classes = permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-            queryset = Address.objects.filter(user=self.request.user)
+        queryset = Address.objects.filter(user=self.request.user)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['post'])
     def set_primary_address(self, request, *args, **kwargs):

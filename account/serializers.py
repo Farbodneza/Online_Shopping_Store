@@ -43,6 +43,11 @@ class CustomUserEditProfileSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'first_name', 'last_name', 'phone_number']
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'phone_number']
+
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:

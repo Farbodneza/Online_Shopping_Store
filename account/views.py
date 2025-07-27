@@ -123,10 +123,14 @@ class VerifyOTPAPIView(APIView):
 
 class ProfileManagmentAPIView(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
+    lookup_field = 'username'
+    lookup_url_kwarg = 'me'
+
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
             return CustomUserEditProfile
         return CustomuserRegisterSerializer
+    
     def get_permissions(self):
         if self.action == 'list':
             permission_classes = [IsAdminUser]

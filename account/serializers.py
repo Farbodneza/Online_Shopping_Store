@@ -36,10 +36,12 @@ class OTPVerifySerializer(serializers.Serializer):
     otp = serializers.CharField()
 
 
-class CustomUserEditProfile(serializers.Serializer):
-    bio = serializers.CharField(required=False)
-    profile_picture = serializers.ImageField(required=False)
-    username = serializers.CharField(required=False)
+class CustomUserEditProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(read_only=True)
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'first_name', 'last_name', 'phone_number']
+
 
 
 class AddressSerializer(serializers.ModelSerializer):

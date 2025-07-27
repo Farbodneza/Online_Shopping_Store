@@ -5,10 +5,12 @@ from account.models import CustomUser, Address
 class CustomuserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password', 'phone_number']
+        fields = ['username', 'fisrt_name', 'last_name', 'email', 'password', 'phone_number']
     def create(self, validated_data):
         user = CustomUser(
             username=validated_data['username'],
+            fisrt_name=validated_data['fisrt_name'],
+            last_name=validated_data['last_name'],
             email=validated_data['email'],
             phone_number = validated_data['phone_number']
             )

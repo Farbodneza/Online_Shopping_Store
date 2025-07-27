@@ -17,8 +17,9 @@ from account.serializers import (CustomuserRegisterSerializer,
                                 CustomuserLoginSerializer, 
                                 OTPRequestSerializer,
                                 OTPVerifySerializer,
-                                CustomUserEditProfile,
-                                AddressSerializer
+                                CustomUserEditProfileSerializer,
+                                UserProfileSerializer,
+                                AddressSerializer,
                             )
 import random
 
@@ -121,25 +122,23 @@ class VerifyOTPAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class ProfileManagmentAPIView(viewsets.ModelViewSet):
+class MyProfileAPIView(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
+    permission_classes = [IsAuthenticated, IsProfileOwnerOrAdmin]
     lookup_field = 'username'
-    lookup_url_kwarg = 'me'
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
-            return CustomUserEditProfile
-        return CustomuserRegisterSerializer
+            return CustomUserEditProfileSerializer
+        return UserProfileSerializer
     
-    def get_permissions(self):
-        if self.action == 'list':
-            permission_classes = [IsAdminUser]
-        elif self.action in ['update', 'partial_update', 'destroy', 'retrieve']:
-            permission_classes = [IsAuthenticated, IsProfileOwnerOrAdmin] 
-        else:
-            permission_classes = [IsAuthenticated, IsAdminUser]
-        return [permission() for permission in permission_classes]
-    
+    def get_object(self):
+        """
+        This method is overridden to return the user associated with the request token.
+        No username or ID is needed in the URL.
+        """
+        return self.request.user
+
 
 class AddressManagerAPIViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
